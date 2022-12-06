@@ -18,20 +18,73 @@ We are interested in tracking and localizing various body parts and identify mul
 
 In this experiment, we provide a set of scripts that is simple to run, integrating the DeepLabCut toolbox with the RFID technology. The system, implemented in Python, is completely automated. Our scripts are divided into two main stages: Stage I: Pose estimation and multi-animal tracking using DLC, that is used for creating a model for pose estimation and multi-animal tracking, and Stage II: Mouse identification using RFID system. In the first stage, a pose estimation model is created, trained and evaluated. In the second stage, the RFID detections are used to replace DLC dummy IDs with their corresponding RFID tag. Furthermore, we provide a set of scripts for checking and re-matching the mice ID whenever a potential ID swap made by DLC has been detected.
 
-Mice need to be microshipped
-
 
 # Experimental setup
 
 Use image: Experimental setup overview
 Use image: social Interaction: workflow
 
-# Data Acquisition
-## Video Recording
-If the user is want to analyse videos without any interest in distigush between them (no identification) then there is no need for the RFID system. Also there is no need for the RFID system if the animals does not look identical (diiferent coat color) and mice do not need to be microshipped with RFID tags.
 
-If mice need to be identified, then it's required to use the RFID system. Thus, a syncrynisation between the the video and the RFID data is nececarry. The scripts in the directory `video_recording` provides this functionality. The `server.py` file must be run on the server side which is the computer recieving the video (Windows, Unix).  The `client.py` file should be run on the Raspberry pi which is connected to the camera.
+# 1. Data Acquisition
+## 1.1. Video Recording
+Video recording is done using the picamera package that provides pure Python interface to the Raspberry Pi camera. If you are using the Rasbian OS then picamera should be already installed. To check, you can start python and try to import picamera:
+> python -c "import picamera"
 
+If picamera is not installed, you can simply install it using the apt tool:
+> sudo apt-get update
+> sudo apt-get install python-picamera python3-picamera
+
+Check [picamera](https://picamera.readthedocs.io/en/release-1.13/install.html) for more information.
+
+### 1.1.2. Getting started
+Connect your camera module to the CSI port on your Raspberry Pi; this is the long thin port adjacent to the HDMI socket. Gently lift the collar on top of the CSI port (if it comes off, don’t worry, you can push it back in but try to be more gentle in future!). Slide the ribbon cable of the camera module into the port with the blue side facing the Ethernet port (or where the Ethernet port would be if you’ve got a model A/A+).
+
+Once the cable is seated in the port, press the collar back down to lock the cable in place. If done properly you should be able to easily lift the Pi by the camera’s cable without it falling out. The following illustrations show a well-seated camera cable with the correct orientation:
+![connection](good_connection.jpg)
+
+### 1.1.3. Testing
+Now, apply power to your Pi. Once booted, start the Raspberry Pi Configuration utility and enable the camera module:
+![pi-config](enable_camera.webp)
+
+You will need to reboot after doing this (but this is one-time setup so you won’t need to do it again unless you re-install your operating system or switch SD cards). Once rebooted, start a terminal and try the following command:
+> raspistill -o image.jpg
+
+If everything is working correctly, the camera should start, a preview from the camera should appear on the display and, after a 5-second delay it should capture an image (storing it as image.jpg) before shutting down the camera. Proceed to the Basic Recipes.
+
+### 1.1.4. Recording to a network stream
+Recording video to a stream is done using a file-like object created from a socket(). We’re sending a continual stream of video frames, so we can simply dump the recording straight to the network socket. Firstly, the server side script which will simply read the video stream and pipe it to a media player for display. 
+
+The PC acts as the server, waiting for a connection from the client (PI). When it accepts a connection, it starts streaming video over it. To enable the commutation between the PC and the PI, the IP address on both sides must be adapted. Follow the instruction to set a static IP address on [Windows](https://support.microsoft.com/en-us/windows/change-tcp-ip-settings-bd0a07af-15f5-cd6a-363f-ca2b6f391ace).
+
+EXAMPLE to set the ip adresses:
+On the server side (PC) go to setting > Ethernet > change adapter options > select Ethernet > Properties > select Internet Protocol Version 4 (TCP/IPv4). A window will pop up. Select: Use the following IP addresses: 192.168.10.19 and for the subnet mask: ...
+On the PI side set the IP adress to 192.168.10.18
+(todo explain this in a better way).
+![ethernet](ethernet.PNG)
+todo: adapt the ip adress on the image.
+
+todo: screenshot the other side on the pi.
+
+The file `server.py` must be run from your PC i.e. on which device the recorded video should be stored. To start listening to the client connection, run:
+> python server.py
+
+The file `client.py` must be run on the PI side. It will connect to the network socket and start the recording:
+> python client.py
+
+At that moment a new directory with the name of the time of recording session. The folder will contain two files. The video (`date@time.H264`) and the timestamp (`date@time.start_ts.txt`) of the first video frame.
+The video file will be used in step `X` to perform the tracking using DLC. The text file will be used to synchronize the video with RFID data to accomplish the ID matching process.
+The duration of the recording, the frame rate and resolution can be changed in the `client.py` script.
+Default values are set to 24 hours, 25 fps, 1280x720 pixels.
+
+    Note: while the recording session is on, you will probably notice several seconds of latency. This is normal and is because media players buffer several seconds to guard against unreliable network streams. 
+
+[More information](https://picamera.readthedocs.io/en/release-1.13/recipes1.html#recording-to-a-network-stream)
+
+
+
+
+## 1.2. RFID readings
+tbc
 # Installation
 You can clone the scripts of ColonyRack package from GitHub by firing up the shell and typing:
 
