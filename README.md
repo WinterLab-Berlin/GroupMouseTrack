@@ -21,8 +21,13 @@ In this experiment, we provide a set of scripts that is simple to run, integrati
 
 # Experimental setup
 
-Use image: Experimental setup overview
-Use image: social Interaction: workflow
+Social Interaction: workflow
+![abstract-expermental-protocol](abstract-expermental-protocol.png)
+
+
+Setup overview
+![real-setup-overview.png](real-setup-overview.png)
+
 
 
 # 1. Data Acquisition
