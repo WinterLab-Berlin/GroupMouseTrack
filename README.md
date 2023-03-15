@@ -1,215 +1,361 @@
+# GroupMouseTrack (GMT)
+GMT is aimed at facilitating the study of mouse behavior in social interactions. GMT utilizes state-of-the-art technology to perform pose estimation, tracking, and identification of several interacting identical-looking mice, without the need for physical markers. The project applies an end-to-end solution based on Deep Neural Networks (DNN) with the help of [DeepLabCut (DLC)](https://deeplabcut.github.io/DeepLabCut), a Python framework built on TensorFlow for tracking and localizing several mice bodyparts. Though not required for tracking, GMT provides a set of scripts that seamlessly integrate DLC with an RFID (Radio Frequency Identification) system. This allows for distinguishing between individuals by matching the their RFIDs with their positions in video, and automate periodic correction of potential misidentifications (ID switches) made by the trained Deep Neural Network. This approach eliminates the need for manual inspection. 
+
+todo: add demo gif here.
+
 # Table of Contents
 [1. Motivation](#motivation)
 
-[2. Overview](#overview)
+[2. Quick start](#quick-start)
 
-[2. Experimental setup](#Experimental-setup)
+[3. What is included](#what-is-included)
 
-# Motivation
-Locating and tracking moving objects and organisms in spatio-temporal data finds application in a wide variety research. For instance, in the field of neuroscience, social interactions are analyzed to provide insights into healthy and pathological cognitive and emotional processes. To realize the location and tracking aspect of such tasks, there exist a variety of methods which can extract and process the necessary information from video data.
-In its simplest form, a human annotator can locate and track points of interest within and across subsequent frames. This task, however, is mundane and time-consuming, quickly leading to fatigue and subsequently errors in annotation. Especially demanding are multi-individual scenarios showing fast movements.
-Computer vision provides sophisticated methods to automate parts of this process. These methods traditionally rely on marking several body parts of the animal to accomplish location and tracking. While such a solution can perform highly accurate pose estimation, placing markers on animals to track various body parts can negatively impact an animals natural behavior and possibly alter research results.
-Recently, novel deep learning-based methods have simplified these techniques and relieved the need for attaching physical markers to the animals. Deep learning algorithms can learn to predict and track the positions of specific body parts across multiple animals from videos frames without being explicitly instructed. Compared to prior methodologies, this method provides a faster and more accurate automated prediction of animal posture.
+[4. Overview](#overview)
 
-The experiment was carried out in the Winter laboratory at Humboldt University.
+  <!-- [4.1. Repository Contents](#repository-contents)  -->
 
+[5. Workflow](#repository-contents) 
+
+[6. Experimental setup](#experimental-setup)
+
+[7. Installation](#installation) 
+
+  <!-- [7.1. Prerequisites](#prerequisites) 
+
+  [7.2. Steps for installation](#steps-for-installation)  -->
+
+[8. (I) Data Acquisition](#(I)-data-acquisition) 
+<!-- 
+  [8.1. RFID Detection](#rfid-detection) 
+
+  [8.2. Video Recording](#video-recording) -->
+
+[9. (II) Pose estimation and Multi-animal Tracking](#(II)-pose-estimation-and-multi-animal-tracking) 
+  
+  <!-- [9.1. Jupyter Notebooks templates](#jupyter-notebooks-templates) 
+  
+  [9.2. Configuration](configuration) 
+  
+  [9.3. Starting the analysis](#starting-the-analysis) 
+  
+  [9.4. Troubleshooting](#troubleshooting)  -->
+
+[10. (III) Animal identification and verification](#(III)-Animal-identification-and-verification) 
+
+[11. (IV) Correcting of Switched Identities](#(IV)-Correcting-of-Switched-Identities-(CSI)) 
+
+[12. Getting help](#Getting-help)
+
+# Quick start
+todo..
+
+# What is included
+todo..
 
 # Overview
-The project applies an end-to-end solution based on Deep Neural Networks (DNN) with the help of DeepLabCut (DLC), a Python framework built on TensorFlow, to investigate its viability in the context of pose estimation and tracking of mice in an experimental setup, which solely rely on raw video data as input.
+The project can be used to record videos of laboratory mice in a homecage suited on an arena of RFID sensors for prolonged periods, and allows for the analysis of new videos from similar experimental setups. The project scripts have been designed to be scalable, customizable, and user-friendly. Additionally, it incorporates an automated method that allows the user to specify the positions of RFID readers dynamically on the video frame without requiring any prior configuration. This feature is particularly useful for maintaining consistency while adjusting the camera position. Although the default number of RFID readers is eight, the scripts can accommodate any number of RFID readers. The trained model has been developed on images containing three mice, but this is not an absolute limit. Users can perform experiments with more or fewer mice of any coat color during inference.
 
-The experiment uses a single, low-cost camera to record multiple RFID-tagged mice in a cage equipped with RFID sensors. In each recording session, laboratory animals are recorded and tracked for long time scales, allowing for the capture of a diversity of social interactions and building the basis for social behavior studies. Though not required for tracking, the RFID data can be used to detect potential identity swaps made by the trained DNN as well as match the mice’s RFIDs to their location in video. The final model we provide achieved a test error of 4.9 pixels, which is similar to the labelling variability between humans (5.2 pixels).
+## Repository Contents
+```
+GroupMouseTrack:
+  ├───video_recording
+  │   ├───server.py
+  │   └───client.py
+  ├───DLC
+  │   ├───dlc-models
+  │   │   └───config.yaml
+  │   └───examples
+  │       ├───Demo_data
+  │       ├───COLAB_template.ipynb
+  │       └───JUPYTER_template.ipynb
+  ├───RFID
+  └───main.py
+```
+# Workflow
+The project consists of four main stages that are independent of each other:
 
+**<u>(I) Data Acquisition:**</u> 
+  
+  **<u>1.1. Video Recording**</u>  
+    In this stage, you will learn how to record video data. If you already have video data and do not need to acquire new data, you can skip this step and move on to the next stage.
 
-todo-conclusion: [[We utilized the DeepLabCut toolbox to track and localize several mice keypoints in complex social inter- actions without the need for physical markers.
-Besides DeepLabCut, we utilized an RFID (Radio Frequency Identification) system to identify and dif- ferentiate between various mice, that are microchipped with an RFID tag. Furthermore, we used RFID tagging to automate periodic correction of mice identity switches without the need for manual inspec- tion. One limitation of employing RFID system in order to identify multiple mice, is that the RFID tag detections are not precise as the neural network predictions, especially when numerous mice are housed in an 820 𝑐𝑚2 cage. Therefore, utilizing an RFID system to correct identity switches may result in cer- tain identity errors, which occur when a mouse overlaps with a mismatched RFID tag, and FN detections, which can arise when just one of the switched Identities is corrected.
+  **<u>1.2. RFID Detection</u>**  
+    This stage explains how to gather RFID detections, although RFID data is not required for the tracking process (at stage 2). It is only required for the identification process (at stage 3 and 4).
 
-In our experiment, we provide a set of scripts that combines DLC and the RFID system to perform pose estimation, tracking, and identification of a horde of interacting mice in a laboratory home cage. Researchers can use our software to record videos over long times scales and analyze novel videos from comparable experimental settings. We developed our scripts to be scalable, customizable and easy to use. In addition, we designed an automated method allowing the user to dynamically specify the RFID reader positions on the video frame with no prior-configuration. This is beneficial for ensuring consistency when changing the camera position. The RFID system we used consists of eight RFID readers; nevertheless, our scripts are capable to function with any number of RFID readers. Our trained model has been trained on images containing three mice, but this is not a strict upper bound. For inference, users can run the experiment with more or less mice.]]
+**<u>(II) Pose Estimation and Multi-Animal Tracking</u>**   
+In this stage, the recorded videos will be analyzed and evaluated using our trained Deep Neural Network to perform inference. The trained model will be used to estimate the postures and movements of each animal in the video. 
 
-The objective of this experiment is: 1) tracking and localizing various body parts, 2) identify multiple identical-looking mice across a broad collection of behaviors and 3) correct potential identity switch between the animals. In this experiment, we provide a set of scripts that is implemented in python and completely automated and simple to run, integrating the DeepLabCut toolbox with the RFID technology. This guide will go you through three main stages: 
-* **Stage I: Data acquisition:** 
-    All necessary steps to record the video data and to gather RFID detections will be explained at this stage
+**<u>(III) Animal Identification</u>** 
+The DLC generic IDs will be matched and replaced with their associated RFID tags in order to identify the animals.
 
-* **Stage II: Pose estimation and multi-animal tracking:**
-    Using DLC, the recorded videos will be analyzed and evaluated using our trained model. The final output at this stage will be tracks of postures for each individual as h5/CSV files and labeled videos with dummy identities.
+**<u>(IV) Identity Verification</u>** 
+Finally, potential ID-switches between individuals made by DLC will be detected and corrected in order to ensure accurate identification.
 
-* **Stage III: Animal identification and verification:**
-    The RFID detections will be used to replace DLC dummy IDs with their associated RFID tag. Furthermore, we provide other set of scripts for verifying and re-matching the mice ID whenever a potential ID swap made by DLC has been detected.
-
-
-# Experimental setup
-
-The experiment can be performed in a mouse home-cage that should house the RFID implemented mice. Above the mice’s home-cage, a camera can be placed. We used a small 5 Megapixel Raspberry Pi camera (any compatible camera would work) with two infrared LEDs, that automatically switches between day and night mode automatically. The Pi-Camera is need to be connected to a Raspberry Pi with the Raspbian operating system. The RFID reader device must be suited underneath the customized home-cage and connected to a Windows PC via an Ethernet wire as shown in the following figure:
+<!-- ![abstract-expermental-protocol](abstract-expermental-protocol.png) -->
 <figure>
-  <img src="real-setup-overview.png" alt="Experimental setup overview" width="400"/>
+  <img src="media/abstract-expermental-protocol.png" alt="my alt text" width="400"/>
   <!-- <figcaption>Experimental setup overview.</figcaption> -->
 </figure>
 
+# Experimental setup
+
+This documentation provides a comprehensive guide to set up the experiment. You will need the following equipment:
+
+* A PC running Windows OS
+* A low-cost Pi-camera [todo: link to be added]
+* A Raspberry Pi [todo: link to be added]
+* A mouse home-cage
+* An RFID system
+* RFID microchipped mice
+* A router
+  
+The home-cage is supposed to house the RFID implemented mice. It should be provided with enough food and water. The camera should be placed above the cage to capture the mice's activity. For this project, a small 5-megapixel Raspberry Pi camera (or any compatible camera would work) with two infrared LEDs that automatically switches between day and night mode was used. The Pi-Camera must be connected to a Raspberry Pi (RPi) running on the Raspbian operating system via a flex cable. The RFID reader device should be placed underneath the customized home-cage and connected to a Windows PC via an Ethernet wire, as shown in Figure 2. 
+<!-- ## Technical (Hardware) Considerations -->
+
+<figure>
+  <img src="media/real-setup-overview.png" alt="Experimental setup overview" width="400"/>
+  <!-- <figcaption>Experimental setup overview.</figcaption> -->
+</figure>
 
 # Installation
-You can clone the scripts from GitHub by firing up the shell and typing:
+## Prerequisites
+Before installing the software, make sure you have Python and DLC (DeepLabCut) installed on your PC. Please follow the following instructions
+
+## Steps for Installation
+### Step 1: Install Anaconda or Miniconda
+Anaconda or Miniconda provides an easy way to install Python and additional packages. You can download and install Anaconda from [here](https://docs.anaconda.com/anaconda/install/windows/) or Miniconda from [here](https://docs.conda.io/en/latest/miniconda.html).
+
+### Step 2: Clone the Repository
+Clone the GroupMouseTrack repository from GitHub using the following command in the shell:
 
 ```sh
 git clone https://github.com/WinterLab-Berlin/GroupMouseTrack.git
 ```
-Alternatively, you can go to the Git repository and download the package manually.
+Alternatively, you can download the package manually from the Git repository. It can be downloaded anywhere on your system, even in the Downloads folder.
 
-<!-- ![abstract-expermental-protocol](abstract-expermental-protocol.png) -->
-<figure>
-  <img src="abstract-expermental-protocol.png" alt="my alt text" width="400"/>
-  <!-- <figcaption>Experimental setup overview.</figcaption> -->
-</figure>
+### Step 3: Create Conda Environment
+Open the Anaconda Prompt app using the search bar (or press Windows key and search for Anaconda Prompt). Navigate to the GroupMouseTrack folder in the Anaconda Command Prompt using the following command:
 
-# Stage I: Data Acquisition
-## 1. RFID detection
-RFID data is acquired on the Windows PC. The RFID data detections provide a series of events in a CSV file that has information about each mouse (its identity) that has been scanned by a reader, as well as its timestamp and location. RFID reads can be rogue and imprecise, in the sense that a tag can be read from multiple readers in a single time segment (i.e. one second), implying that the RFID device estimates the mouse position. The detection is done using the software x-todo. Run the application and start recording. This step can be done either before or after the video recording. However, we recommend starting collecting the RFID data before the video recording session stars.
+```sh
+cd C:\Users\YourUserName\Desktop\GroupMouseTrack
+```
+You can also use a trick to get the location right by holding SHIFT and right-clicking and then selecting "Copy as path."
+
+Create a conda Python virtual [environment](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html), which includes all the required packages by typing the following command:
+
+```sh
+conda env create -f gmt_conda.yaml
+```
+You can now use this environment from anywhere on your computer without going back into the conda folder. To activate the environment, run the following command:
+
+```sh
+conda activate GroupMouseTrack
+```
+Now, you should see `(GroupMouseTrack)` on the left of your terminal screen. Note that there is no need to run install python or DeeLabCut as it is already installed.
+
+> Note: All instructions in this section need to be done only one time.
+
+# (I) Data Acquisition
+## 1. RFID Detection
+To collect RFID data, you need to use the X-software (todo: add name of RFID-software) on the Windows PC. The software records events of mouse detection generated by the RFID readers, and saves the data as events in a CSV file. Each event contains information about the mouse's identity, the timestamp of its movement and its position. It is important to note that RFID reads can be imprecise, and a tag can be read from multiple readers in a single time segment i.e. the RFID system can only estimate the position of the RFID tags. This step can be done either before or after the video starting the recording session. However, it is recommended to start gathering the RFID data before the video recording session stars.
 
 todo : add a screenshot here of the RFID application.
 
 ## 2. Video Recording
-We use the communication protocol SSH to enable the communication between the RPi and the Windows PC (also possible via VNC). Image frames are encoded to an H264 video file. Additionally, the timestamp of the first captured frame will be stored in a CSV file. This step will be important later on when we synchronize videos with RFID data to perform the ID matching process. For the video recording, we used a simple network communication protocol for sending a continual stream of video frames. We provide two scripts: a server, that runs on the Windows machine and listens/waits for a connection from the Raspberry Pi, and a client that runs on the RPi and sends a continual stream of images to the server. The default recording resolution is set to 1280 x 720 and the frame rate to 25 FPS.
+The communication between the Raspberry Pi and Windows PC is enabled by using the SSH protocol (or VNC would also work). The Raspberry Pi camera captures image frames, which are encoded into an H264 video file. Additionally, A CSV file will be automatically created to store the timestamp of the first captured frame, which is important for synchronizing videos with RFID data for the ID matching process. For the video recording, a simple network communication protocol is used to send a continual stream of video frames. Two scripts are provided: a server that runs on the Windows machine and waits for a connection from the Raspberry Pi, and a client that runs on the Raspberry Pi and sends a continual stream of images to the server.
 
-The recording is done using the `picamera` package that provides pure Python interface to the Raspberry Pi camera. If you are using the `Rasbian OS` then `picamera` should be already installed. To check, you can start python and try to import picamera:
+The picamera package is used to interface with the Raspberry Pi camera, providing a pure Python interface. If the Rasbian OS is used, picamera is likely to be already installed. To check, Python can be started and picamera can be imported using the command:
 
 ```sh
 python -c "import picamera"
 ```
 
-If `picamera` is not installed, you can simply install it using the apt tool:
+If picamera is not already installed, it can be easily installed using the apt tool. To do this, run the following commands in the terminal:
 
 ```sh
 sudo apt-get update
 sudo apt-get install python-picamera python3-picamera
 ```
+Refer to the [picamera-documentation] (https://picamera.readthedocs.io/en/release-1.13/install.html) for more information and details on the installation process.
 
-Check [picamera](https://picamera.readthedocs.io/en/release-1.13/install.html) for more information.
+## 2.1. Getting started with the Camera Module
+Connect your camera module to the CSI port on your Raspberry Pi. This port is located next to the HDMI socket and can be identified as the long, thin port. Follow these steps to connect the camera module:
 
-### 2.1. Getting started
-Connect your camera module to the CSI port on your Raspberry Pi; this is the long thin port adjacent to the HDMI socket. Gently lift the collar on top of the CSI port (if it comes off, don’t worry, you can push it back in but try to be more gentle in future!). Slide the ribbon cable of the camera module into the port with the blue side facing the Ethernet port (or where the Ethernet port would be if you’ve got a model A/A+).
+1. Gently lift the collar on top of the CSI port.
+2. Slide the ribbon cable of the camera module into the port with the blue side facing the Ethernet port (or where the Ethernet port would be if you have a model A/A+).
+3. Once the cable is seated in the port, press the collar back down to lock the cable in place. You should be able to lift the Pi by the camera's cable without it falling out if it's done correctly.
 
-Once the cable is seated in the port, press the collar back down to lock the cable in place. If done properly you should be able to easily lift the Pi by the camera’s cable without it falling out. The following illustrations show a well-seated camera cable with the correct orientation:
-![connection](good_connection.jpg)
+The correct orientation of the camera cable is shown in the illustration below:
 
-### 2.2. Testing
-Now, apply power to your Pi. Once booted, start the Raspberry Pi Configuration utility and enable the camera module:
-![pi-config](enable_camera.webp)
+<figure>
+  <img src="media/good_connection.jpg" alt="connection" width="400"/>
+  <!-- <figcaption>Experimental setup overview.</figcaption> -->
+</figure>
 
-You will need to reboot after doing this (but this is one-time setup, so you won’t need to do it again unless you re-install your operating system or switch SD cards). Once rebooted, start a terminal and try the following command:
 
-```sh
-raspistill -o image.jpg
-```
+## 2.2. Testing
+To test the camera module, follow these steps:
 
-If everything is working correctly, the camera should start, a preview from the camera should appear on the display and, after a 5-second delay it should capture an image (storing it as image.jpg) before shutting down the camera. Proceed to the Basic Recipes.
+1. Apply power to your Raspberry Pi.
+2. Once the Pi is booted, open the Raspberry Pi Configuration utility.
+3. Enable the camera module by selecting the "Enable Camera" option, as shown in the image below:
 
-### 2.3. Recording to a network stream
-Recording video to a stream is done using a file-like object created from a socket(). A continual stream of video frames will be sent, so that the recording can be simply dumped straight to the network socket. Firstly, the server side script which will read the video stream and pipe it to a media player for display. 
+  <!-- ![media/pi-config](enable_camera.webp) -->
+  <figure>
+    <img src="media/enable_camera.webp" alt="connection" width="400"/>
+    <!-- <figcaption>Experimental setup overview.</figcaption> -->
+  </figure>
 
-The PC acts as the server, waiting for a connection from the client (PI). When it accepts a connection, it starts streaming video over it. To enable the commutation between the PC and the PI, the IP address on both sides must be adapted. Follow the instruction to set a static IP address on [Windows](https://support.microsoft.com/en-us/windows/change-tcp-ip-settings-bd0a07af-15f5-cd6a-363f-ca2b6f391ace).
+4. Reboot your Pi. This is a one-time setup, so you won't need to repeat it unless you reinstall your operating system or switch SD cards.
+5. Once your Pi has rebooted, open a terminal and run the following command to test the camera module:
+    ```sh
+    raspistill -t 5000 -o image.jpg
+    ```
 
-EXAMPLE to set the ip adresses:
-On the server side (PC) go to setting > Ethernet > change adapter options > select Ethernet > Properties > select Internet Protocol Version 4 (TCP/IPv4). A window will pop up. Select: Use the following IP addresses: 192.168.10.19 and for the subnet mask: ...
-On the PI side set the IP adress to 192.168.10.18
-(todo explain this in a better way).
-![ethernet](ethernet.PNG)
+This command captures an image using the camera and saves it as "image.jpg" in the current directory after a 5-second delay. If everything is working correctly, a preview from the camera should appear on the display before it captures the image and then shuts down the camera.
+
+## 2.3. Start Recording
+The PC acts as the server and waits for a connection from the client (RPi). To enable communication between the PC and the PI, set static IP addresses on both sides.
+
+Go to Settings > Ethernet > Change adapter options > Select Ethernet > Properties > Select Internet Protocol Version 4 (TCP/IPv4) and enter IP address for example: 192.168.10.19 and subnet mask: (todo). On the RPi side, set the IP address for example to: 192.168.10.18
+
+Follow the instruction to set a static IP address on [Windows](https://support.microsoft.com/en-us/windows/change-tcp-ip-settings-bd0a07af-15f5-cd6a-363f-ca2b6f391ace).
+
+<!-- ![ethernet](ethernet.PNG) -->
+  <figure>
+    <img src="media/ethernet.PNG" alt="connection" width="400"/>
+    <!-- <figcaption>Experimental setup overview.</figcaption> -->
+  </figure>
 todo: adapt the ip adress on the image.
 
 todo: screenshot the other side on the pi.
 
-The file `server.py` must be run from the PC i.e. on which device the recorded video should be stored. To start listening to the client connection, run:
+todo: add path to the serve.py and client.py to the explainations.
+
+Run `server.py` on the PC and `client.py` on the RPi to start the recording. The recorded video will be saved to a new directory named after the time of the recording session. The directory will contain the video (`date@time.H264`) and the timestamp (`date@time.start_ts.txt`) of the first video frame. The video file will be used for tracking using DLC, and the text file will be used to synchronize the video with RFID data for ID matching.
+
+First, start listening to the client connection by running `server.py` on the terminal of your PC:
 
 ```sh
 python server.py
 ```
 
-The file `client.py` must be run on the PI side. It will connect to the network socket and start the recording:
+To start the recording, run `client.py` on the RPi:
 
 ```sh
 python client.py
 ```
+To stop the recording, press `ctrl + c` on any of the terminals. This will terminate the recording process on both the PC and the RPi.
 
-At that moment a new directory with the name of the time of recording session. The folder will contain two files. The video (`date@time.H264`) and the timestamp (`date@time.start_ts.txt`) of the first video frame.
-The video file will be used in step `X` to perform the tracking using DLC. The text file will be used to synchronize the video with RFID data to accomplish the ID matching process.
-The duration of the recording, the frame rate and resolution can be changed in the `client.py` script.
-Default values are set to 24 hours, 25 fps, 1280x720 pixels.
+The duration of the recording, the frame rate and resolution can be adapted in the `client.py` script. The default values are set to 24 hours, 25 fps, and 1280x720 pixels.
 
-    Note: while the recording session is on, you will probably notice several seconds of latency. This is normal and is because media players buffer several seconds to guard against unreliable network streams. 
+Note: During the recording session, there might be several seconds of latency, which is normal. This occurs because media players buffer several seconds to protect against unstable network streams. 
 
-[More information](https://picamera.readthedocs.io/en/release-1.13/recipes1.html#recording-to-a-network-stream)
+More information can be found [here.](https://picamera.readthedocs.io/en/release-1.13/recipes1.html#recording-to-a-network-stream)
 
 
-# Stage II: Pose estimation and multi-animal tracking
-To perform pose estimation, DeepLabCut (DLC) need to be installed. DLC is a toolbox for markerless pose estimation of animals performing various tasks. As long as you can see (label) what you want to track, you can use this toolbox, as it is animal and object agnostic. A short development and application summary can be found [here](https://deeplabcut.github.io/DeepLabCut). 
+# (II) Pose estimation and Multi-animal Tracking
+Once you have cloned the project and having anaconda (or miniconda) and DLC installed, you can now use our trained network to analyze your own videos. The final output will be tracks of postures for each individual as h5/CSV files and labeled videos with initial generic identities.
 
-## Configuration
-Install DeepLabCut by typing the following in your terminal:
+## Jupyter Notebooks templates
+We provide demo video located in `GroupMouseTrack/DLC/demo_data` that can be used as a help to walk you through your own dataset.
+Additionally, We provide a Jupyter and Colab Notebooks that run on our a pre-labeled dataset. The notebook templates are located in `DLC\examples` directory of the cloned repository:
 
-```sh
-# todo: add dlc in the dependcies!
-pip install deeplabcut[gui,tf]==2.2
+* `JUPYTER_template.ipynb`: Example for an already started project with labeled data that works on your local machine.
+* `COLAB_template.ipynb`: Aimed to run the analysis on Google cloud machines.
+
+These files serve as a template for the user to develop a project and the necessary steps for analyzing row novel videos. Your videos do not have to be in the same project directory. They can be located anywhere on your computer. You only need to pass the path of your videos to the variable `videofile_path` in the notebook files e.g.:
+
+If you want to analyze specific video(s):
+```python
+videofile_path = ['fullpath/videos/video1.avi','fullpath/videos/video2.avi']
 ```
 
-We chose the best model checkpoint with the best evaluation results for analyzing the videos. Once you have downloaded our project and having DLC installed, you can now use our trained network to analyze your own videos. We provide a Jupyter Notebook that runs DeepLabCut and demonstrate the necessary steps to use DeepLabCut. Additional, we provide demo data that can be used in the analysis and helpful to walk you through your own dataset. 
+If you want to analyze all videos in a folder:
+```python
+videofile_path = ['fullpath/videos/']
+```
+To set up your project properly, please follow the instructions in the notebook files. 
 
-The project directory contains a configuration file called `dlc_config.yaml`. The file contains many important parameters of the project, and you might need to change only some of them. You can open it in any text editor (like atom, gedit, vim etc.). Relevant parameters including their description:
+## Configuration
+The cloned repository contains also a pre-configuration file located in the `DLC` directory and called `dlc_config.yaml`. This file contains the DLC configuration parameters. Open it in any text editor (like Notepad, atom, gedit, vim etc.) and set the `project_path` to the absolute of the project directory file i.e. where `dlc_config.yaml` is located. e.g.:
+
+_File:_ `dlc_config.yaml` 
+```yaml
+# Project path (change when moving around)
+project_path : C:\Desktop\GroupMouseTrack\DLC\maDLC_SI--2022-07-13`
+```
+**NOTE: This parameter need to be edited in BOTH cases, i.e. if you run notebook on your local machine on the cloud provider machines.**
+
+Some other parameters in the file `dlc_config.yaml`, that you might want to edit:
 
 * `p-cutoff`: specifies the threshold of the likelihood and helps to distinguishing likely body parts from uncertain once.
 * `batch_size`: specifies how many frames to process at once during inference.
 * `dotsize`: specifies the marker size when plotting the labels in videos.
 
-The parameter `individuals` are names of “individuals” in the annotation dataset. This is generic (e.g. mouse1, mouse2, etc.). These individuals are comprised of the same bodyparts. We trained the network on datasets with three animals. However, for inference, if you have a video with more or less animals, that is fine - you can have more or less animals during the video analysis and the network can find them without changing anything in the config file!
+The parameter `individuals` are names of “individuals” in the annotation dataset. This is generic (e.g. mouse1, mouse2, etc.). These individuals are comprised of the same bodyparts.
 
-Please note that novel videos DO NOT need to be added to the `dlc_config.yaml`. You can simply have a folder elsewhere on your computer and pass the video folder (then it will analyze all videos of the specified type (i.e. videotype='.mp4'), or pass the path to the folder or exact video(s) you wish to analyze.
+```
+Note: the network is trained on datasets of three animals. However, for inference, if you have a video with more or less animals, that is fine - you can have more or less animals during the video analysis and the network can find them without changing anything in the config file!
+```
+
+<!-- 
+TODO: check this!
+add more names in the config.yaml file, and change topktoretrain in inference_cfg.yaml file to be > 1 (i.e. .inf or if maximum, known set it there, i.e. 5, etc). -->
+
 
 ## Starting the analysis
-If you want to analyze all videos in a folder:
-```python
-deeplabcut.analyze_videos('config.yaml', ['fullpath/videos/'], videotype='.mp4')
+### On your local machine
+1. Open the Anaconda Prompt app.
+2. Activate the `GroupMouseTrack` conda environment.
+```sh
+conda activate GroupMouseTrack
 ```
-
-If you want to analyze specific video(s):
-```python
-deeplabcut.analyze_videos('config.yaml',['fullpath/videos/video1.avi','/videos/video2.avi'])
+3. Navigate to the project folder, using the cd command. e.g.: 
+```sh
+cd C:\Users\YourUserName\Desktop\GroupMouseTrack\DLC
 ```
+4. Type jupyter notebook followed by the Enter key.
 
-Analyzing hour-long videos may take a while, but the task can be conveniently broken down into the analysis of smaller video clips. Add the following code to the Jupyter Notebook:
-```python
-from deeplabcut.utils.auxfun_videos import VideoWriter
+Please review [Troubleshooting](#troubleshooting) if you face any problem.
 
-_, ext = os.path.splitext(video_path)
-vid = VideoWriter(video_path)
-clips = vid.split(n_splits=10)
-deeplabcut.analyze_videos(config_path, clips, ext)
-```
-todo: test video without encoding the video. test with h264. For Tips on video re-encoding and preprocessing see: https://deeplabcut.github.io/DeepLabCut/docs/recipes/io.html
+### On Google Colab
+If your computer does not have a powerful GPU, the analysis might last for long time. You can use a cloud service from Google, which provides free GPU machines.
+For demonstration, you can use the Colab notebook, hosted on our google drive, and runs on our dataset:
+<a href="https://drive.google.com/file/d/1KeC6t229RgVAFuu9YYcK4LB9RC1jpEvE/view?usp=share_link" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
+
+Ultimately, you want to run the analysis on your data, for this do as follows:
+1. Open [Google Drive](https://drive.google.com/) with your account.
+2. Upload the project repository (only the DLC directory will be sufficient).
+3. Upload your videos.
+4. Open [Google Colab](https://colab.research.google.com/).
+5. Navigate to the Colab file `COLAB_template.ipynb` and open it.
+   
+In the notebook file, DLC will be imported and ready to analyze your videos. You need to edit the path to the config file `config.yaml` as explained in [Configuration](#configuration) and the path to your videos as explained in [jupyter notebooks templates](#jupyter-notebooks-templates) section.
+
+Check the notebook files, to set up your project properly and have more informations.
+
+## on a cloud provider (i.e. Google Colab, Gradient Paperspace) and run it on their machines.
 
 ## output
 h5
 todo: dlc.export_model
-## Technical (Hardware) Considerations
+
 
 ## Troubleshooting
 If you have any issue running the analysis or finding the results, it is most likely because:
 a) the path is wrong (check that that folder is correct).
 b) the video ending is different (by default DLC looks for ‘.avi’ files), you can change what it looks for by changing video_type (e.g. to ‘.mp4’).
+conda
+https://stackoverflow.com/questions/37085665/in-which-conda-environment-is-jupyter-executing
 
 
-
-
-
-
-
-
-
-
-
-
----
-# Stage III: Animal identification and verification
-At this stage, the DLC-generated individual initial-dummy IDs are matched with RFID readings, and each microchipped mouse is assigned its associated RFID tag. Both RFID and DeepLabCut detections are synchronized. Based on the overlap between the position of the RFID tags and the animal locations, predicted by DLC, each mouse will be then mapped to its associated RFID tag.
+# (III) Animal identification and verification
+At this stage, the DLC-generated individual initial generic IDs are matched with RFID readings, and each microchipped mouse is assigned its associated RFID tag. Both RFID and DeepLabCut detections are synchronized. Based on the overlap between the position of the RFID tags and the animal locations, predicted by DLC, each mouse will be then mapped to its associated RFID tag.
 
 DeepLabCut detections consists of several keypoints for each mouse. In order to perform the ID-matching, each individual need a single representative annotation. Thus, the centroid (mean location) of essential body parts (shoulder, spine1 to spine4, and tailbase) will be computed. Hence, an overlapping within a frame occurs when the averaged RFID tag and the centroid of a mouse body parts generated by DeepLabCut are predicted in the same RFID reader region. The centroid will also be used as a parameter in the process of the correction of identity switches (See the parameter `correction_method` in [Usage](#usage)).
 
----
+
 ## Correcting of Switched Identities (CSI)
 The swapping problem occurs when assembled body parts are formed into tracks for each individual across frames. When DeepLabCut stitches tracklets and keypoints have inadequate pose estimation for few frames, tracklets may be lined incorrectly across frames. DeepLabCut claims that there should be no identity switching, if we have a highly accurate position estimation in every frame.
 
@@ -285,3 +431,16 @@ walks you through your own dataset
 
 ## What you DON’T need to get started:
 No specific computer/cameras/videos are required
+
+If you have any questions or issues during the process, please refer to the project's documentation or reach out for help.
+
+---
+<!-- The Project uses a single, low-cost camera (todo: name of camera)  -->
+<!-- 820 𝑐𝑚2 cage. -->
+<!-- The final model we provide achieved a test error of 4.9 pixels, which is similar to the labelling variability between humans (5.2 pixels). -->
+
+
+<!-- Please note that novel videos DO NOT need to be added to the `dlc_config.yaml`. You can simply have a folder elsewhere on your computer and pass the video folder (then it will analyze all videos of the specified type (i.e. videotype='.mp4'), or pass the path to the folder or exact video(s) you wish to analyze. -->
+
+---
+<!-- todo: test video without encoding the video. test with h264. For Tips on video re-encoding and preprocessing see: https://deeplabcut.github.io/DeepLabCut/docs/recipes/io.html --> -->
